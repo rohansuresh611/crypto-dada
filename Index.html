@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crypto AI Dashboard</title>
+</head>
+<body style="background:black;color:white;text-align:center;font-family:Arial;">
+
+<h1>🚀 Crypto AI Dashboard</h1>
+
+<h2>BTC Price</h2>
+<p id="price">Loading...</p>
+
+<h2>AI Analysis</h2>
+<p id="analysis">Waiting...</p>
+
+<script>
+async function getPrice() {
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+    const data = await res.json();
+    const price = data.bitcoin.usd;
+    document.getElementById("price").innerText = "$" + price;
+    return price;
+  } catch (err) {
+    document.getElementById("price").innerText = "Error loading price";
+  }
+}
+
+async function getAIAnalysis(price) {
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer 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",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "mistralai/mistral-7b-instruct",
+        messages: [
+          {
+            role: "user",
+            content: `BTC price is ${price}. Tell bullish or bearish in one short line with reason.`
+          }
+        ]
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.choices && data.choices.length > 0) {
+      document.getElementById("analysis").innerText =
+        data.choices[0].message.content;
+    } else {
+      document.getElementById("analysis").innerText = "AI error";
+    }
+
+  } catch (err) {
+    document.getElementById("analysis").innerText = "AI failed";
+  }
+}
+
+async function run() {
+  const price = await getPrice();
+  if (price) {
+    await getAIAnalysis(price);
+  }
+}
+
+run();
+setInterval(run, 60000);
+</script>
+
+</body>
+</html>
