@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crypto AI Dashboard</title>
+</head>
+<body style="background:black;color:white;text-align:center;">
+
+<h1>Crypto AI Dashboard</h1>
+
+<h2>BTC Price</h2>
+<p id="price">Loading...</p>
+
+<h2>AI Analysis</h2>
+<p id="analysis">Waiting...</p>
+
+<script>
+async function getPrice() {
+  const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+  const data = await res.json();
+  const price = data.bitcoin.usd;
+  document.getElementById("price").innerText = "$" + price;
+  return price;
+}
+
+async function getAIAnalysis(price) {
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer YOUR_API_KEY",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "mistralai/mistral-7b-instruct",
+      messages: [
+        {
+          role: "user",
+          content: `BTC price is ${price}. Tell bullish or bearish in one line with reason.`
+        }
+      ]
+    })
+  });
+
+  const data = await res.json();
+  document.getElementById("analysis").innerText =
+    data.choices[0].message.content;
+}
+
+async function run() {
+  const price = await getPrice();
+  await getAIAnalysis(price);
+}
+
+run();
+setInterval(run, 60000);
+</script>
+
+</body>
+  </html>
