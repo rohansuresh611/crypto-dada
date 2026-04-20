@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Income & Expense Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Hind:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --card2: #20243a;
+      --accent-green: #2ecc71;
+      --accent-red: #e74c3c;
+      --accent-blue: #4e8cff;
+      --accent-yellow: #f9c74f;
+      --text: #eaeaea;
+      --muted: #7a7f9a;
+      --border: #2a2d3e;
+      --input-bg: #131621;
+      --radius: 16px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Hind', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px 0;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #20243a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 320px; height: 160px;
+      background: radial-gradient(ellipse, rgba(78,140,255,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    header h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #4e8cff, #2ecc71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    /* ── Period Tabs ── */
+    .period-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 24px 20px 0;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 10px 26px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .tab-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+    .tab-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(78,140,255,0.35);
+    }
+
+    /* ── Period Label ── */
+    .period-label {
+      text-align: center;
+      margin-top: 18px;
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.1rem;
+      color: var(--accent-yellow);
+      letter-spacing: 0.5px;
+      min-height: 28px;
+    }
+
+    /* ── Main Grid ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 20px 18px 0;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    @media(max-width: 600px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel Card ── */
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .panel-header {
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .income-panel .panel-icon { background: rgba(46,204,113,0.15); }
+    .expense-panel .panel-icon { background: rgba(231,76,60,0.15); }
+    .panel-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .income-panel .panel-title { color: var(--accent-green); }
+    .expense-panel .panel-title { color: var(--accent-red); }
+    .panel-total {
+      margin-left: auto;
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .income-panel .panel-total { color: var(--accent-green); }
+    .expense-panel .panel-total { color: var(--accent-red); }
+
+    /* ── Entries ── */
+    .entries-list {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .entry-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--input-bg);
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+    .entry-row input[type="text"] {
+      flex: 1.3;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Hind', sans-serif;
+      font-size: 0.93rem;
+      min-width: 0;
+    }
+    .entry-row input[type="text"]::placeholder { color: var(--muted); }
+    .divider-dot {
+      color: var(--border);
+      font-size: 1.2rem;
+      user-select: none;
+    }
+    .entry-row input[type="number"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.97rem;
+      font-weight: 600;
+      text-align: right;
+      min-width: 0;
+    }
+    .entry-row input[type="number"]::placeholder { color: var(--muted); }
+    .rupee-badge {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      border-radius: 6px;
+      transition: color 0.18s, background 0.18s;
+      line-height: 1;
+    }
+    .del-btn:hover { color: var(--accent-red); background: rgba(231,76,60,0.1); }
+
+    /* ── Add Button ── */
+    .add-btn {
+      margin: 0 16px 16px;
+      width: calc(100% - 32px);
+      padding: 10px;
+      border-radius: 10px;
+      border: 1.5px dashed;
+      background: transparent;
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.93rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .income-panel .add-btn {
+      color: var(--accent-green);
+      border-color: rgba(46,204,113,0.35);
+    }
+    .income-panel .add-btn:hover {
+      background: rgba(46,204,113,0.08);
+      border-color: var(--accent-green);
+    }
+    .expense-panel .add-btn {
+      color: var(--accent-red);
+      border-color: rgba(231,76,60,0.35);
+    }
+    .expense-panel .add-btn:hover {
+      background: rgba(231,76,60,0.08);
+      border-color: var(--accent-red);
+    }
+
+    /* ── Summary Bar ── */
+    .summary-bar {
+      max-width: 860px;
+      margin: 20px auto 0;
+      padding: 0 18px;
+    }
+    .summary-card {
+      background: var(--card2);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .summary-item { text-align: center; }
+    .summary-item .s-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .summary-item .s-value {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+    .s-income { color: var(--accent-green); }
+    .s-expense { color: var(--accent-red); }
+    .s-balance-pos { color: var(--accent-blue); }
+    .s-balance-neg { color: var(--accent-yellow); }
+    .divider-v {
+      width: 1px; height: 40px;
+      background: var(--border);
+    }
+    @media(max-width:480px) { .divider-v { display:none; } .summary-card { justify-content: center; } }
+
+    /* ── Save Button ── */
+    .save-wrap {
+      max-width: 860px;
+      margin: 18px auto 0;
+      padding: 0 18px;
+      display: flex;
+      gap: 12px;
+    }
+    .save-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #4e8cff, #2ecc71);
+      color: #fff;
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      box-shadow: 0 4px 18px rgba(78,140,255,0.25);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .save-btn:active { transform: none; }
+    .clear-btn {
+      padding: 14px 22px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .clear-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #2ecc71;
+      color: #fff;
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.97rem;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 40px;
+      box-shadow: 0 6px 24px rgba(46,204,113,0.35);
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+      opacity: 0;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💰 Income & Expense Tracker</h1>
+  <p>Apna paisa manage karo — smart tarike se</p>
+</header>
+
+<!-- Period Tabs -->
+<div class="period-tabs">
+  <button class="tab-btn" onclick="selectPeriod('daily',this)">📅 Daily</button>
+  <button class="tab-btn active" onclick="selectPeriod('weekly',this)">🗓️ Weekly</button>
+  <button class="tab-btn" onclick="selectPeriod('monthly',this)">📆 Monthly</button>
+  <button class="tab-btn" onclick="selectPeriod('yearly',this)">🗃️ Yearly</button>
+</div>
+
+<div class="period-label" id="periodLabel">📅 Weekly Track — Yeh week ka hisaab</div>
+
+<!-- Main Grid -->
+<div class="main-grid">
+
+  <!-- Income Panel -->
+  <div class="panel income-panel">
+    <div class="panel-header">
+      <div class="panel-icon">💵</div>
+      <span class="panel-title">Income</span>
+      <span class="panel-total" id="incomeTotal">₹ 0</span>
+    </div>
+    <div class="entries-list" id="incomeList"></div>
+    <button class="add-btn" onclick="addEntry('income')">＋ Income Add Karo</button>
+  </div>
+
+  <!-- Expense Panel -->
+  <div class="panel expense-panel">
+    <div class="panel-header">
+      <div class="panel-icon">💸</div>
+      <span class="panel-title">Expenses</span>
+      <span class="panel-total" id="expenseTotal">₹ 0</span>
+    </div>
+    <div class="entries-list" id="expenseList"></div>
+    <button class="add-btn" onclick="addEntry('expense')">＋ Expense Add Karo</button>
+  </div>
+
+</div>
+
+<!-- Summary -->
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="summary-item">
+      <div class="s-label">Total Income</div>
+      <div class="s-value s-income" id="sumIncome">₹ 0</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="summary-item">
+      <div class="s-label">Total Expense</div>
+      <div class="s-value s-expense" id="sumExpense">₹ 0</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="summary-item">
+      <div class="s-label">Balance</div>
+      <div class="s-value s-balance-pos" id="sumBalance">₹ 0</div>
+    </div>
+  </div>
+</div>
+
+<!-- Buttons -->
+<div class="save-wrap">
+  <button class="save-btn" onclick="saveData()">💾 Save Karo</button>
+  <button class="clear-btn" onclick="clearAll()">🗑️ Clear</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──
+  let currentPeriod = 'weekly';
+  const allData = {}; // { period: { income: [...], expense: [...] } }
+
+  const periodLabels = {
+    daily:   '📅 Daily Track — Aaj ka hisaab',
+    weekly:  '🗓️ Weekly Track — Yeh week ka hisaab',
+    monthly: '📆 Monthly Track — Is mahine ka hisaab',
+    yearly:  '🗃️ Yearly Track — Is saal ka hisaab',
+  };
+  const incomeNames = {
+    daily:   ['Salary/Wages', 'Freelance', 'Other'],
+    weekly:  ['Weekly Salary', 'Part-time', 'Online Work', 'Other'],
+    monthly: ['Monthly Salary', 'Rent Income', 'Business', 'Other'],
+    yearly:  ['Annual Salary', 'Business Profit', 'Investment', 'Other'],
+  };
+  const expenseNames = {
+    daily:   ['Breakfast', 'Lunch', 'Travel', 'Other'],
+    weekly:  ['Grocery', 'Travel', 'Electricity', 'Other'],
+    monthly: ['Rent', 'EMI', 'Grocery', 'Utilities', 'Other'],
+    yearly:  ['Rent/Year', 'Insurance', 'Taxes', 'Other'],
+  };
+
+  function getOrInit(period) {
+    if (!allData[period]) {
+      allData[period] = {
+        income:  incomeNames[period].map(n => ({ name: n, amount: '' })),
+        expense: expenseNames[period].map(n => ({ name: n, amount: '' })),
+      };
+    }
+    return allData[period];
+  }
+
+  // ── Select Period ──
+  function selectPeriod(period, btn) {
+    saveCurrentToState();
+    currentPeriod = period;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('periodLabel').textContent = periodLabels[period];
+    renderAll();
+  }
+
+  function saveCurrentToState() {
+    const d = allData[currentPeriod];
+    if (!d) return;
+    ['income','expense'].forEach(type => {
+      const rows = document.querySelectorAll(`#${type}List .entry-row`);
+      d[type] = Array.from(rows).map(row => ({
+        name:   row.querySelector('.entry-name').value,
+        amount: row.querySelector('.entry-amount').value,
+      }));
+    });
+  }
+
+  // ── Render ──
+  function renderAll() {
+    const d = getOrInit(currentPeriod);
+    renderList('income', d.income);
+    renderList('expense', d.expense);
+    recalc();
+  }
+
+  function renderList(type, entries) {
+    const list = document.getElementById(`${type}List`);
+    list.innerHTML = '';
+    entries.forEach((e, i) => {
+      list.appendChild(makeRow(type, i, e.name, e.amount));
+    });
+  }
+
+  function makeRow(type, idx, name, amount) {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.innerHTML = `
+      <input class="entry-name" type="text" placeholder="Name likhein..." value="${escHtml(name)}"/>
+      <span class="divider-dot">|</span>
+      <span class="rupee-badge">₹</span>
+      <input class="entry-amount" type="number" placeholder="0" min="0" value="${escHtml(amount)}"/>
+      <button class="del-btn" title="Delete" onclick="deleteEntry('${type}',${idx})">✕</button>
+    `;
+    row.querySelector('.entry-name').addEventListener('input', recalc);
+    row.querySelector('.entry-amount').addEventListener('input', recalc);
+    return row;
+  }
+
+  // ── Add / Delete ──
+  function addEntry(type) {
+    saveCurrentToState();
+    allData[currentPeriod][type].push({ name: '', amount: '' });
+    renderAll();
+    // scroll to bottom of that list
+    const list = document.getElementById(`${type}List`);
+    list.lastElementChild && list.lastElementChild.querySelector('.entry-name').focus();
+  }
+
+  function deleteEntry(type, idx) {
+    saveCurrentToState();
+    allData[currentPeriod][type].splice(idx, 1);
+    renderAll();
+  }
+
+  // ── Recalc ──
+  function recalc() {
+    const incAmt = sumList('incomeList');
+    const expAmt = sumList('expenseList');
+    const bal = incAmt - expAmt;
+
+    document.getElementById('incomeTotal').textContent  = '₹ ' + fmt(incAmt);
+    document.getElementById('expenseTotal').textContent = '₹ ' + fmt(expAmt);
+    document.getElementById('sumIncome').textContent    = '₹ ' + fmt(incAmt);
+    document.getElementById('sumExpense').textContent   = '₹ ' + fmt(expAmt);
+
+    const balEl = document.getElementById('sumBalance');
+    balEl.textContent = (bal < 0 ? '- ₹ ' : '₹ ') + fmt(Math.abs(bal));
+    balEl.className = 's-value ' + (bal >= 0 ? 's-balance-pos' : 's-balance-neg');
+  }
+
+  function sumList(listId) {
+    let total = 0;
+    document.querySelectorAll(`#${listId} .entry-amount`).forEach(inp => {
+      total += parseFloat(inp.value) || 0;
+    });
+    return total;
+  }
+
+  // ── Save ──
+  function saveData() {
+    saveCurrentToState();
+    showToast('✅ Data save ho gaya!');
+  }
+
+  // ── Clear ──
+  function clearAll() {
+    if (!confirm('Kya aap sure hain? Is period ka saara data clear ho jayega.')) return;
+    delete allData[currentPeriod];
+    renderAll();
+    showToast('🗑️ Data clear ho gaya!');
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ── Utils ──
+  function fmt(n) {
+    return n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  }
+  function escHtml(s) {
+    return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  // ── Init ──
+  renderAll();
+</script>
+</body>
+</html>
