@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FLOW — Finance Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --void:#020408;
+  --panel:#080f1c;
+  --panel2:#0b1424;
+  --cyan:#00e5ff;
+  --green:#00ff88;
+  --red:#ff3d5a;
+  --gold:#ffd700;
+  --text:#b8d4e8;
+  --muted:#2e4a62;
+  --line:rgba(0,229,255,0.09);
+  --r:10px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--void);
+  font-family:'Rajdhani',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);
+  background-size:44px 44px;
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;
+  top:-2px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,var(--cyan) 50%,transparent 100%);
+  animation:scanline 7s linear infinite;
+  opacity:0.4;z-index:1;
+}
+@keyframes scanline{0%{top:-2px}100%{top:100vh}}
+
+.wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:0 18px 80px}
+
+/* HEADER */
+header{
+  padding:36px 0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+.logo{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900;
+  letter-spacing:6px;color:var(--cyan);
+  text-shadow:0 0 24px rgba(0,229,255,0.45),0 0 60px rgba(0,229,255,0.12);}
+.logo sub{font-size:0.5rem;letter-spacing:2px;color:var(--muted);display:block;
+  font-family:'Rajdhani',sans-serif;margin-top:3px;font-weight:400}
+.status{display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:blink 2.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.status span{font-size:0.68rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+
+/* PERIOD TABS */
+.tabs{
+  display:flex;gap:4px;margin-top:26px;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:5px;
+}
+.tab{
+  flex:1;padding:10px 6px;
+  background:transparent;border:none;
+  color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:0.62rem;letter-spacing:1.5px;
+  cursor:pointer;border-radius:8px;
+  transition:all 0.28s ease;
+}
+.tab:hover{color:var(--cyan)}
+.tab.on{
+  background:var(--cyan);color:#020408;
+  font-weight:700;
+  box-shadow:0 0 18px rgba(0,229,255,0.35);
+}
+
+/* PERIOD LABEL */
+.plabel{
+  margin-top:24px;
+  display:flex;align-items:center;gap:14px;
+}
+.plabel h2{
+  font-family:'Orbitron',monospace;
+  font-size:0.68rem;letter-spacing:4px;color:var(--cyan);
+  opacity:0.55;white-space:nowrap;
+}
+.plabel hr{flex:1;border:none;border-top:1px solid var(--line)}
+
+/* SUMMARY */
+.summary{
+  display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;
+  margin-top:18px;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;
+}
+.si{padding:18px 0;text-align:center}
+.si .l{font-size:0.62rem;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.si .v{font-family:'Orbitron',monospace;font-size:1.15rem;font-weight:700}
+.sdiv{background:var(--line)}
+.ci{color:var(--green);text-shadow:0 0 14px rgba(0,255,136,0.35)}
+.ce{color:var(--red);text-shadow:0 0 14px rgba(255,61,90,0.35)}
+.cb{color:var(--cyan);text-shadow:0 0 14px rgba(0,229,255,0.35)}
+.cn{color:var(--gold);text-shadow:0 0 14px rgba(255,215,0,0.35)}
+
+/* PANELS */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+@media(max-width:580px){.panels{grid-template-columns:1fr}}
+
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color 0.3s}
+.pcard:hover{border-color:rgba(0,229,255,0.18)}
+
+.phead{
+  padding:15px 16px 12px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--line);
+}
+.pico{
+  width:32px;height:32px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;
+}
+.inc-card .pico{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.18);color:var(--green)}
+.exp-card .pico{background:rgba(255,61,90,0.07);border:1px solid rgba(255,61,90,0.18);color:var(--red)}
+.ptitle{font-family:'Orbitron',monospace;font-size:0.68rem;letter-spacing:3px;text-transform:uppercase}
+.inc-card .ptitle{color:var(--green)}
+.exp-card .ptitle{color:var(--red)}
+.psum{margin-left:auto;font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:700}
+.inc-card .psum{color:var(--green)}
+.exp-card .psum{color:var(--red)}
+
+/* ROWS */
+.elist{padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-height:40px}
+.erow{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(0,229,255,0.025);
+  border:1px solid rgba(0,229,255,0.06);
+  border-radius:7px;padding:8px 10px;
+  animation:ri 0.2s ease;transition:border-color 0.2s,background 0.2s;
+}
+@keyframes ri{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.erow:focus-within{border-color:rgba(0,229,255,0.22);background:rgba(0,229,255,0.05)}
+.enum{font-family:'Orbitron',monospace;font-size:0.55rem;color:var(--muted);min-width:14px}
+.ename{
+  flex:1.4;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.92rem;font-weight:500;min-width:0;
+}
+.ename::placeholder{color:var(--muted)}
+.esep{width:1px;height:14px;background:var(--line);flex-shrink:0}
+.esym{font-size:0.7rem;color:var(--muted);font-family:'Orbitron',monospace}
+.eamt{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'Orbitron',monospace;font-size:0.84rem;font-weight:600;
+  text-align:right;min-width:0;
+}
+.eamt::placeholder{color:var(--muted)}
+.edel{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:0.7rem;padding:2px 4px;
+  border-radius:4px;transition:color 0.18s,background 0.18s;line-height:1;
+}
+.edel:hover{color:var(--red);background:rgba(255,61,90,0.1)}
+
+/* ADD */
+.addwrap{margin:2px 12px 13px}
+.addbtn{
+  width:100%;padding:8px;
+  background:transparent;border:1px dashed;
+  border-radius:7px;
+  font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:2px;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.inc-card .addbtn{color:var(--green);border-color:rgba(0,255,136,0.18)}
+.inc-card .addbtn:hover{background:rgba(0,255,136,0.05);border-color:var(--green)}
+.exp-card .addbtn{color:var(--red);border-color:rgba(255,61,90,0.18)}
+.exp-card .addbtn:hover{background:rgba(255,61,90,0.05);border-color:var(--red)}
+
+/* ACTIONS */
+.actions{display:flex;gap:10px;margin-top:18px}
+.bsave{
+  flex:1;padding:14px;border:none;border-radius:var(--r);
+  background:var(--cyan);color:#020408;
+  font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;letter-spacing:2.5px;
+  cursor:pointer;overflow:hidden;position:relative;
+  box-shadow:0 0 22px rgba(0,229,255,0.28);
+  transition:box-shadow 0.2s;
+}
+.bsave::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,0.2) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform 0.55s;
+}
+.bsave:hover::after{transform:translateX(100%)}
+.bsave:hover{box-shadow:0 0 38px rgba(0,229,255,0.45)}
+.bclear{
+  padding:14px 20px;border:1px solid var(--line);
+  border-radius:var(--r);background:transparent;
+  color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;
+  transition:all 0.2s;
+}
+.bclear:hover{border-color:var(--red);color:var(--red)}
+
+/* corner accents */
+.ca{position:fixed;pointer-events:none;z-index:1}
+.ca.tl{top:0;left:0;width:50px;height:50px;
+  border-top:1px solid rgba(0,229,255,0.18);
+  border-left:1px solid rgba(0,229,255,0.18)}
+.ca.br{bottom:0;right:0;width:50px;height:50px;
+  border-bottom:1px solid rgba(0,229,255,0.18);
+  border-right:1px solid rgba(0,229,255,0.18)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:26px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:rgba(0,229,255,0.08);
+  border:1px solid rgba(0,229,255,0.3);
+  color:var(--cyan);
+  font-family:'Orbitron',monospace;font-size:0.68rem;letter-spacing:2px;
+  padding:11px 26px;border-radius:40px;backdrop-filter:blur(14px);
+  transition:transform 0.38s cubic-bezier(.34,1.56,.64,1),opacity 0.3s;
+  opacity:0;z-index:999;
+  text-shadow:0 0 10px rgba(0,229,255,0.4);
+}
+.toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<div class="ca tl"></div>
+<div class="ca br"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="logo">FLOW<sub>FINANCE INTELLIGENCE SYSTEM</sub></div>
+    <div class="status"><div class="dot"></div><span>LIVE</span></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab" onclick="selP('daily',this)">DAILY</button>
+    <button class="tab on" onclick="selP('weekly',this)">WEEKLY</button>
+    <button class="tab" onclick="selP('monthly',this)">MONTHLY</button>
+    <button class="tab" onclick="selP('yearly',this)">YEARLY</button>
+  </div>
+
+  <div class="plabel">
+    <h2 id="ptitle">WEEKLY TRACK</h2>
+    <hr/>
+  </div>
+
+  <div class="summary">
+    <div class="si"><div class="l">Income</div><div class="v ci" id="sInc">₹0</div></div>
+    <div class="sdiv"></div>
+    <div class="si"><div class="l">Expense</div><div class="v ce" id="sExp">₹0</div></div>
+    <div class="sdiv"></div>
+    <div class="si"><div class="l">Balance</div><div class="v cb" id="sBal">₹0</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="pcard inc-card">
+      <div class="phead">
+        <div class="pico">↑</div>
+        <span class="ptitle">Income</span>
+        <span class="psum" id="iTotal">₹0</span>
+      </div>
+      <div class="elist" id="iList"></div>
+      <div class="addwrap"><button class="addbtn" onclick="addE('i')">+ ADD SOURCE</button></div>
+    </div>
+    <div class="pcard exp-card">
+      <div class="phead">
+        <div class="pico">↓</div>
+        <span class="ptitle">Expense</span>
+        <span class="psum" id="eTotal">₹0</span>
+      </div>
+      <div class="elist" id="eList"></div>
+      <div class="addwrap"><button class="addbtn" onclick="addE('e')">+ ADD EXPENSE</button></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="bsave" onclick="saveD()">SAVE DATA</button>
+    <button class="bclear" onclick="clearD()">CLEAR</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CFG={
+  daily: {title:'DAILY TRACK',   i:['Salary','Freelance','Other'],        e:['Food','Travel','Misc']},
+  weekly:{title:'WEEKLY TRACK',  i:['Weekly Pay','Part-time','Online'],    e:['Grocery','Transport','Bills','Other']},
+  monthly:{title:'MONTHLY TRACK',i:['Salary','Business','Rent Income'],    e:['Rent','EMI','Grocery','Utilities']},
+  yearly:{title:'YEARLY TRACK',  i:['Annual Salary','Profit','Dividend'],  e:['Tax','Insurance','Rent/yr','Other']},
+};
+let cur='weekly';
+const store={};
+
+function get(p){
+  if(!store[p]) store[p]={i:CFG[p].i.map(n=>({n,a:''})),e:CFG[p].e.map(n=>({n,a:''}))};
+  return store[p];
+}
+function flush(){
+  const d=store[cur];if(!d)return;
+  ['i','e'].forEach(t=>{
+    store[cur][t]=Array.from(document.querySelectorAll(`#${t}List .erow`)).map(r=>({
+      n:r.querySelector('.ename').value,
+      a:r.querySelector('.eamt').value
+    }));
+  });
+}
+function selP(p,btn){
+  flush();cur=p;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('ptitle').textContent=CFG[p].title;
+  render();
+}
+function render(){
+  const d=get(cur);
+  rList('i',d.i);rList('e',d.e);recalc();
+}
+function rList(t,arr){
+  const el=document.getElementById(`${t}List`);
+  el.innerHTML='';
+  arr.forEach((e,i)=>el.appendChild(mkRow(t,i,e.n,e.a)));
+}
+function mkRow(t,idx,name,amt){
+  const d=document.createElement('div');
+  d.className='erow';
+  d.innerHTML=`
+    <span class="enum">${String(idx+1).padStart(2,'0')}</span>
+    <input class="ename" type="text" placeholder="Name..." value="${x(name)}"/>
+    <div class="esep"></div>
+    <span class="esym">₹</span>
+    <input class="eamt" type="number" placeholder="0.00" min="0" value="${x(amt)}"/>
+    <button class="edel" onclick="delE('${t}',${idx})">✕</button>`;
+  d.querySelector('.ename').addEventListener('input',recalc);
+  d.querySelector('.eamt').addEventListener('input',recalc);
+  return d;
+}
+function addE(t){
+  flush();get(cur)[t].push({n:'',a:''});render();
+  const l=document.getElementById(`${t}List`);
+  l.lastElementChild?.querySelector('.ename').focus();
+}
+function delE(t,i){flush();get(cur)[t].splice(i,1);render()}
+function recalc(){
+  const ic=sm('iList'),ec=sm('eList'),b=ic-ec;
+  document.getElementById('iTotal').textContent=f(ic);
+  document.getElementById('eTotal').textContent=f(ec);
+  document.getElementById('sInc').textContent=f(ic);
+  document.getElementById('sExp').textContent=f(ec);
+  const bel=document.getElementById('sBal');
+  bel.textContent=(b<0?'-':'')+f(Math.abs(b));
+  bel.className='v '+(b>=0?'cb':'cn');
+}
+function sm(id){let t=0;document.querySelectorAll(`#${id} .eamt`).forEach(i=>t+=parseFloat(i.value)||0);return t}
+function saveD(){flush();toast('DATA SAVED ✓')}
+function clearD(){if(!confirm('Clear this period?'))return;delete store[cur];render();toast('CLEARED')}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+function f(n){return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:2})}
+function x(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+render();
+</script>
+</body>
+</html>
